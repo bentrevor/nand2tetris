@@ -1,0 +1,42 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/Or8Way.hdl
+
+/**
+ * 8-way Or:
+ * out = (in[0] or in[1] or ... or in[7])
+ */
+
+CHIP Or8Way {
+    IN in[8];
+    OUT out;
+
+    PARTS:
+    Or(a=in[0], b=in[1], out=ortail1);
+    Or(a=in[2], b=ortail1, out=ortail2);
+    Or(a=in[3], b=ortail2, out=ortail3);
+    Or(a=in[4], b=ortail3, out=ortail4);
+    Or(a=in[5], b=ortail4, out=ortail5);
+    Or(a=in[6], b=ortail5, out=ortail6);
+    Or(a=in[7], b=ortail6, out=out);
+
+    /**
+    Not(in=in[0], out=notin0);
+    Not(in=in[1], out=notin1);
+    Not(in=in[2], out=notin2);
+    Not(in=in[3], out=notin3);
+    Not(in=in[4], out=notin4);
+    Not(in=in[5], out=notin5);
+    Not(in=in[6], out=notin6);
+    Not(in=in[7], out=notin7);
+    And(a=notin0, b=notin1, out=notinfirst2);
+    And(a=notin2, b=notinfirst2, out=notinfirst3);
+    And(a=notin3, b=notinfirst3, out=notinfirst4);
+    And(a=notin4, b=notinfirst4, out=notinfirst5);
+    And(a=notin5, b=notinfirst5, out=notinfirst6);
+    And(a=notin6, b=notinfirst6, out=notinfirst7);
+    And(a=notin7, b=notinfirst7, out=allfalse);
+    Not(in=allfalse, out=out);
+    */
+}
