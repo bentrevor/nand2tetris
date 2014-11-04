@@ -1,9 +1,8 @@
 class Assembler
-  attr_accessor :parser, :outfile, :symbol_table, :binary, :asm_code
+  attr_accessor :parser, :outfile, :symbol_table, :binary
 
   def initialize(name)
     @parser = Parser.new("./#{name}.asm")
-    @asm_code = @parser.asm_code
     @outfile = File.new("./#{name}.hack", 'w')
     @symbol_table = SymbolTable.new
     @binary = ''
@@ -28,7 +27,7 @@ class Assembler
       end
     end
 
-    @parser.asm_code = @asm_code
+    @parser.reset_position
   end
 
   def translate_lines

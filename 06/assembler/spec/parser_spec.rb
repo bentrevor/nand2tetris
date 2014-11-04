@@ -20,23 +20,23 @@ describe Parser do
 
   it 'strips comments' do
     allow(File).to receive(:read).and_return("// bla\r\n@bla  // yo")
+
     parser.advance
-    expect(parser.current_command).not_to eq '// bla'
-    expect(parser.current_command).to eq '@bla'
+    expect(parser.current_command.symbol).to eq 'bla'
   end
 
   it 'knows when it is done reading a file' do
     expect(parser.has_more_commands?).to be true
-    parser.asm_code = ''
+    3.times { parser.advance }
     expect(parser.has_more_commands?).to be false
   end
 
-  it 'strips whitespace from the current command' do
-    expect(parser.current_command).to be nil
-
+  it 'can reset its counter' do
+    expect(parser.command_index).to be 0
     parser.advance
-    expect(parser.current_command).not_to be nil
-    expect(parser.current_command).to eq a_command.strip
+    expect(parser.command_index).to be 1
+    parser.reset_position
+    expect(parser.command_index).to be 0
   end
 
   it 'knows the current command type' do
@@ -49,7 +49,7 @@ describe Parser do
     parser.advance
     expect(parser.command_type).to eq :l
 
-    parser.current_command = nil
+    parser.reset_position
     expect(parser.command_type).to eq nil
   end
 

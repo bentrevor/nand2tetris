@@ -1,61 +1,68 @@
 class Parser
-  attr_accessor :asm_code, :current_command
+  attr_accessor :current_command, :command_index, :lines
+
+  class Command < Struct.new(:type, :symbol, :dest, :comp, :jump)
+    def self.parse(line)
+      return self.new(nil, nil, nil, nil, nil) if line.nil?
+
+      type = symbol = dest = comp = jump = nil
+
+      command = line.split('//').first.strip
+
+      if command =~ /^@(.*)/
+        type = :a
+        symbol = command[1..-1]
+      elsif command =~ /\(.*\)/
+        type = :l
+        symbol = command[1..-2]
+      elsif !command.empty?
+        type = :c
+        dest = command.gsub(/=.*$/, '') if command.include?('=')
+        comp = command.gsub(/^.*=/, '').gsub(/;.*$/, '')
+        jump = command.gsub(/^.*;/, '') if command.include?(';')
+      end
+
+      self.new(type, symbol, dest, comp, jump)
+    end
+  end
 
   def initialize(filename)
-    whole_file = File.read(filename)
-    @asm_code = whole_file.split("\r\n").select { |line| line.strip[0..1] != '//' && !line.empty? }.join("\r\n")
+    @command_index = 0
+    @current_command = Command.parse(nil)
+    @lines = File.read(filename).split("\r\n").select { |line| line.strip[0..1] != '//' && !line.empty? }
   end
 
   def has_more_commands?
-    ! @asm_code.empty?
+    @command_index != @lines.length
+  end
+
+  def reset_position
+    @command_index = 0
+    @current_command = Command.parse(nil)
   end
 
   def advance
-    @current_command = asm_code.split("\r\n").first.strip.split("//").first.strip
-    @asm_code = asm_code.split("\r\n")[1..-1].join("\r\n")
+    @current_command = Command.parse(@lines[@command_index])
+    @command_index += 1
   end
 
   def command_type
-    case @current_command
-    when /^@(.*)/
-      :a
-    when /\(.*\)/
-      :l
-    when nil
-      nil
-    else
-      :c
-    end
+    @current_command.type
   end
 
   def symbol
-    case command_type
-    when :a
-      @current_command[1..-1]
-    when :l
-      @current_command[1..-2]
-    end
+    @current_command.symbol
   end
 
   def dest
-    if command_type == :c
-      return unless @current_command.include?('=')
-
-      @current_command.gsub(/=.*$/, '')
-    end
+    @current_command.dest
   end
 
   def comp
-    if command_type == :c
-      @current_command.gsub(/^.*=/, '').gsub(/;.*$/, '')
-    end
+    @current_command.comp
   end
 
   def jump
-    if command_type == :c
-      return unless @current_command.include?(';')
-
-      @current_command.gsub(/^.*;/, '')
-    end
+    @current_command.jump
   end
 end

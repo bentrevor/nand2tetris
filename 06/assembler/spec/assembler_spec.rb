@@ -12,11 +12,13 @@ describe Assembler do
   end
 
   it 'parses a .asm file and writes to a .hack file' do
-    expect(assembler.parser.asm_code).to eq asm_code
-  end
+    outfile = double('file', :write => nil)
+    allow(File).to receive(:new).and_return(outfile)
 
-  it 'keeps track of the original code so it can reset the parser after the first pass' do
-    expect(assembler.asm_code).to eq asm_code
+    expect(assembler.parser.lines.length).to eq 5
+
+    expect(outfile).to receive(:write)
+    assembler.translate
   end
 
   context 'first pass' do
@@ -27,6 +29,11 @@ describe Assembler do
 
       expect(assembler.symbol_table.contains?('LOOP')).to be true
       expect(assembler.symbol_table.get_address('LOOP')).to eq 0
+    end
+
+    it 'resets the position' do
+      expect(assembler.parser).to receive(:reset_position)
+      assembler.add_labels_to_symbol_table
     end
   end
 
