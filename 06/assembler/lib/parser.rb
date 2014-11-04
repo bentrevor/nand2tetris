@@ -32,6 +32,13 @@ class Parser
     @lines = File.read(filename).split("\r\n").select { |line| line.strip[0..1] != '//' && !line.empty? }
   end
 
+  def each
+    while has_more_commands?
+      advance
+      yield(@current_command)
+    end
+  end
+
   def has_more_commands?
     @command_index != @lines.length
   end

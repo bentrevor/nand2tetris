@@ -25,7 +25,7 @@ describe Assembler do
     it 'puts labels and their memory addresses into the symbol table before parsing' do
       expect(assembler.symbol_table.contains?('LOOP')).to be false
 
-      assembler.add_labels_to_symbol_table
+      assembler.translate
 
       expect(assembler.symbol_table.contains?('LOOP')).to be true
       expect(assembler.symbol_table.get_address('LOOP')).to eq 0
@@ -33,7 +33,7 @@ describe Assembler do
 
     it 'resets the position' do
       expect(assembler.parser).to receive(:reset_position)
-      assembler.add_labels_to_symbol_table
+      assembler.translate
     end
   end
 
