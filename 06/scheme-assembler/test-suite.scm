@@ -20,9 +20,10 @@
   (error (string-append "\x1b[31mfailure: \x1b[0m " subject " " msg)))
 
 (define (assert msg bool)
-  (if bool
-      (print-success msg)
-      (raise-error msg)))
+  (if tests-enabled?
+      (if bool
+          (print-success msg)
+          (raise-error msg))))
 
 (define (assert-eq msg x y)
   (define print-compare (cond ((or (number? x) (string? x) (char? x))
@@ -48,11 +49,18 @@
                                               (print "type of y: " (type-of y) "\n")
                                               (lambda (a b) #f)))))
 
-  (if (eq-type-and-val? x y)
-      (print-success msg)
-      (begin
-        (print-compare x y)
-        (raise-error msg))))
+  (if tests-enabled?
+      (if (eq-type-and-val? x y)
+          (print-success msg)
+          (begin
+            (print-compare x y)
+            (raise-error msg)))))
 
 (define (print-alone x)
   (print "\n\n" x "\n\n"))
+
+(define (tests-finished)
+  (if tests-enabled?
+      (print "\n\ndone with " subject ".\n\n")))
+
+(define tests-enabled? #f)
