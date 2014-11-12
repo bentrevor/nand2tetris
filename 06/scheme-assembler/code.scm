@@ -55,4 +55,5 @@
         ((string=? mnemonic "D-M") "1010011")
         ((string=? mnemonic "M-D") "1000111")
         ((string=? mnemonic "D&M") "1000000")
-        ((string=? mnemonic "D|M") "1010101")))
+        ((string=? mnemonic "D|M") "1010101")
+        (else (print-alone mnemonic))))

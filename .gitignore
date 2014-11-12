@@ -2,3 +2,7 @@
 tmp
 *.out
 *.hack
+Add.asm
+Max.asm
+Pong.asm
+Rect.asm

@@ -5,7 +5,7 @@
 
 
 (define (translate)
-  (let* ((all-chars (call-with-input-file "Add.asm"
+  (let* ((all-chars (call-with-input-file "Pong.asm"
                       (lambda (input-port)
                         (let loop ((char (read-char input-port)))
                           (if (eof-object? char)
@@ -13,16 +13,20 @@
                               (cons char (loop (read-char input-port))))))))
          (asm-code (list->string all-chars))
          (lines (split "\r\n" asm-code))
-         ;; (x  (print-alone (cadr lines)))
          (lines-without-comments (remove-comments lines))
-         (symbol-table (parse-labels lines-without-comments)))
-    (print (asm-to-binary lines symbol-table))))
+         (just-commands (remove-blank-lines lines-without-comments))
+         (symbol-table (parse-labels just-commands))
+         (just-instructions (remove-labels just-commands)))
+
+    (call-with-output-file "Pong.hack"
+      (lambda (output-port)
+        (display (asm-to-binary just-instructions symbol-table) output-port)))))
 
 (define (asm-to-binary lines symbol-table)
   (define (convert-iter lines-left binary-str)
     (if (null? lines-left)
         binary-str
-        (let ((new-binary-str (command-to-binary line symbol-table)))
+        (let ((new-binary-str (string-append (command-to-binary (car lines-left) symbol-table) "\r\n")))
           (convert-iter (cdr lines-left) (string-append binary-str
                                                         new-binary-str)))))
   (convert-iter lines ""))
@@ -34,16 +38,16 @@
         (cond ((string->number sym) (dec-to-bin16 sym))
               ((contains? symbol-table sym) (dec-to-bin16 (get-address symbol-table sym)))
               (else (let ((ram (next-available-ram symbol-table)))
-                        (begin
-                          (add-entry sym ram symbol-table)
-                          (dec-to-bin16 ram)))))
+                      (begin
+                        (add-entry sym ram symbol-table)
+                        (dec-to-bin16 ram)))))
         (string-append "111"
-                       (comp-for (parse-comp command))
-                       (dest-for (parse-dest command))
-                       (jump-for (parse-jump command))))))
+                       (parse-comp-binary command)
+                       (parse-dest-binary command)
+                       (parse-jump-binary command)))))
 
 (define (dec-to-bin16 dec)
-  (let ((dec-num (string->number dec)))
+  (let ((dec-num (if (string? dec) (string->number dec) dec)))
     (pad-to-16 (number->string dec-num 2))))
 
 (define (pad-to-16 str)
@@ -71,6 +75,6 @@
            "0000000001100100")
 
 
-(translate)
-
 (tests-finished)
+
+(translate)

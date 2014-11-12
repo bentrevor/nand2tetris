@@ -9,6 +9,13 @@
 (define get-address hash-get)
 (define add-entry hash-assoc)
 
+(define (next-available-ram symbol-table)
+  (define (ram-iter ram)
+    (if (not (member ram (hash-values symbol-table)))
+        ram
+        (ram-iter (+ 1 ram))))
+  (ram-iter 16))
+
 (define (new-symbol-table keys values)
   (let ((all-keys (append keys     '("SP" "LCL" "ARG" "THIS" "THAT" "SCREEN" "KBD" "R0" "R1" "R2" "R3" "R4" "R5" "R6" "R7" "R8" "R9" "R10" "R11" "R12" "R13" "R14" "R15")))
         (all-values (append values '( 0    1     2     3      4      16384    24576 0    1    2    3    4    5    6    7    8    9    10    11    12    13    14    15))))
@@ -114,26 +121,40 @@
 
   )
 
-(assert "implements #contains?"
-        (contains? (new-symbol-table '("k1" "k2") '("v1" "v2"))
-                   "k1"))
+(let ((symbol-table (new-symbol-table '("k1" "k2") '("v1" "v2"))))
 
-(assert "implements #contains?"
-        (not (contains? (new-symbol-table '("k1" "k2") '("v1" "v2"))
-                        "k3")))
+  (assert "implements #contains?"
+          (contains? symbol-table
+                     "k1"))
 
-(assert-eq "implements #get-address"
-           (get-address (new-symbol-table '("k1" "k2") '("v1" "v2"))
-                        "k1")
-           "v1")
+  (assert "implements #contains?"
+          (not (contains? symbol-table
+                          "k3")))
 
-(assert-eq "implements #get-address"
-           (get-address (new-symbol-table '("k1" "k2") '("v1" "v2"))
-                        "k2")
-           "v2")
+  (assert-eq "implements #get-address"
+             (get-address symbol-table
+                          "k1")
+             "v1")
 
-(assert "implements #add-entry"
-        (contains? (add-entry "k1" "v1" (new-symbol-table '() '()))
-                   "k1"))
+  (assert-eq "implements #get-address"
+             (get-address symbol-table
+                          "k2")
+             "v2")
 
-(tests-finished)
+  (assert-eq "implements #next-available-ram"
+             (next-available-ram symbol-table)
+             16)
+
+  (assert-eq "implements #next-available-ram"
+             (next-available-ram (add-entry "asdf" 16 symbol-table))
+             17)
+
+  (assert-eq "implements #next-available-ram"
+             (next-available-ram (add-entry "asdf" 16 (add-entry "jkl;" 17 symbol-table)))
+             18)
+
+  (assert "implements #add-entry"
+          (contains? (add-entry "k1" "v1" (new-symbol-table '() '()))
+                     "k1"))
+
+  (tests-finished))

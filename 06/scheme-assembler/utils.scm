@@ -55,7 +55,7 @@
           (else                              (index-iter (cdr rest-of-chars)(+ 1 i)))))
   (index-iter (string->list str) 0))
 
-(define (strip-leading-whitespace str)
+(define (strip-whitespace str)
   (define (strip-iter chars stripped-str)
     (if (null? chars)
         (list->string (reverse stripped-str))
@@ -178,8 +178,8 @@
            (index-of #\f "adsf")
            3)
 
-(assert-eq "strip-leading-whitespace"
-           (strip-leading-whitespace  "    asdf")
+(assert-eq "strip-whitespace"
+           (strip-whitespace  "    asdf    ")
            "asdf")
 
 (assert-eq "substr-after a char"
